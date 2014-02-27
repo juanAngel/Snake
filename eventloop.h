@@ -1,12 +1,22 @@
 #ifndef EVENTLOOP_H
 #define EVENTLOOP_H
 
-typedef struct EventLoop{
-    //dispacher;
-    EventLoop* next;
-}EventLoop;
+#include "snake_global.h"
 
-void runEventLoop(EventLoop* l);
-//void setDispacher(EventLoop* l,void(*)(EventLoop*,Event));
+namespace event {
+
+    typedef void (*EventLoopDispacher)(struct EventLoop* loop,SDL_Event* e);
+
+    typedef struct EventLoop{
+        EventLoop* next;
+        EventLoopDispacher d;
+        void* userContext;
+    }EventLoop;
+
+    void runLoop(EventLoop* l);
+    void setDispacher(EventLoop* loop, EventLoopDispacher *d);
+    void setContext(EventLoop* l,void* userContext);
+}
+
 
 #endif // EVENTLOOP_H

@@ -1,6 +1,7 @@
 
 #include "snake_global.h"
 #include "renderer.h"
+#include "scene.h"
 
 
 uint updateEventID;

@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "scene.h"
 
 void drawRectangle(SDL_Renderer* renderer,rectangle* r);
 
@@ -25,4 +26,9 @@ void drawRectangle(SDL_Renderer* renderer,rectangle* r){
     SDL_RenderFillRect(renderer,r);
     SDL_SetRenderDrawColor(renderer, borderColor->r,borderColor->g, borderColor->b, borderColor->a);
     SDL_RenderDrawRect(renderer,r);
+}
+
+
+int renderer::initDrawContext(renderer::DrawContext *c, renderer::DrawContext *old){
+
 }

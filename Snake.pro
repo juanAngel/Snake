@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     renderer.cpp \
     snake.cpp \
     scene.cpp \
-    eventloop.c
+    view.cpp \
+    eventloop.cpp
 
 #unix:LIBS += -lSDL2
 
@@ -18,7 +19,8 @@ HEADERS += \
     snake_global.h \
     scene.h \
     snake.h \
-    eventloop.h
+    eventloop.h \
+    view.h
 
 LIBS += -lSDL2
 

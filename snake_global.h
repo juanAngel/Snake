@@ -1,14 +1,10 @@
 #ifndef SNAKE_GLOBAL_H
 #define SNAKE_GLOBAL_H
 
-#ifdef _WIN32
-    #include "SDL.h"
-#else
-#ifdef __ANDROID__
+#if defined(_WIN32) || defined(__ANDROID__)
     #include "SDL.h"
 #else
     #include "SDL2/SDL.h"
-#endif
 #endif
 #include <stdio.h>
 

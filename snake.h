@@ -2,6 +2,7 @@
 #define SNAKE_H
 
 #include "snake_global.h"
+#include "renderer.h"
 
 
 typedef struct snakeNode{
@@ -13,6 +14,12 @@ typedef struct snakeHead:snakeNode{
     double speed;
     SDL_TimerID timer;
 }snakeHead;
+
+typedef struct drawableSnake: renderer::drawable{
+    snakeHead* snake;
+}drawableSnake;
+
+void initDrawableSnake(drawableSnake* d, snakeHead* head);
 
 //Function for draw Snake and Applet
 void drawSnake(SDL_Renderer* render,snakeHead* snake);

@@ -60,6 +60,9 @@ void drawApplet(SDL_Renderer* render,SDL_Point* AppletPos){
         SDL_RenderFillRect(render,&r);
     }
 }
+void renderSnake(renderer::DrawContext* /*context*/,renderer::drawable* /*drawableObject*/){
+
+}
 
 void drawSnake(SDL_Renderer* render,snakeHead* snake){
     if(render && snake){
@@ -124,4 +127,12 @@ void launchApplet(SDL_Point* Applet,SDL_Rect* display){
     Applet->x -= Applet->x%snakeSize;
     Applet->y -= Applet->y%snakeSize;
     printf("Applet %d,%d\n",Applet->x,Applet->y);
+}
+
+
+void initDrawableSnake(drawableSnake *d, snakeHead *head){
+    if(d && head){
+        d->snake = head;
+        d->renderDrawable = &renderSnake;
+    }
 }
