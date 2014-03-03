@@ -1,6 +1,8 @@
 #include "snake.h"
 #include "scene.h"
 
+#include <stdlib.h>
+
 typedef struct snakeContext{
     snakeHead* snake;
     SDL_Rect* display;

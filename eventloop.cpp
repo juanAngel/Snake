@@ -8,7 +8,7 @@ namespace event {
 
     void setDispacher(EventLoop* loop, EventLoopDispacher *d){
         if(loop && d){
-
+            loop->d = d;
         }
     }
 }

@@ -2,7 +2,7 @@
 #define SNAKE_GLOBAL_H
 
 #if defined(_WIN32) || defined(__ANDROID__)
-    #include "SDL.h"
+    #include <SDL.h>
 #else
     #include "SDL2/SDL.h"
 #endif

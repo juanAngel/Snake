@@ -30,5 +30,28 @@ void drawRectangle(SDL_Renderer* renderer,rectangle* r){
 
 
 int renderer::initDrawContext(renderer::DrawContext *c, renderer::DrawContext *old){
+    return 0;
+}
+
+
+void renderer::draw(renderer::DrawContext *c, renderer::drawable *d){
+    if(c){
+        renderer::clear(c);
+        if(d)
+            d->renderDrawable(c,d);
+        SDL_RenderPresent(c->renderer);
+    }
+}
+
+
+void renderer::clear(DrawContext *c){
+    if(c){
+        SDL_SetRenderDrawColor(c->renderer,
+                               c->clearColor.r,// red
+                               c->clearColor.g,// blue
+                               c->clearColor.b,// green
+                               c->clearColor.a);// alpha
+        SDL_RenderClear(c->renderer);
+    }
 
 }

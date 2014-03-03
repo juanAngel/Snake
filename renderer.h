@@ -9,6 +9,8 @@ namespace renderer {
     typedef struct DrawContext{
         SDL_Renderer* renderer;
         SDL_Point offset;
+        SDL_Color clearColor;
+        bool needRedraw;
     }DrawContext;
 
     typedef void (*DrawFunc)(DrawContext* context,struct drawable* drawableObject);
@@ -17,6 +19,8 @@ namespace renderer {
     }drawable;
 
     int initDrawContext(DrawContext* c,DrawContext* old = 0);
+    void draw(DrawContext* c,drawable* d);
+    void clear(renderer::DrawContext *c);
 }
 
 

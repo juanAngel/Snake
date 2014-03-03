@@ -3,6 +3,8 @@
 #include "renderer.h"
 #include "scene.h"
 
+#include "gameview.h"
+#include "guiview.h"
 
 uint updateEventID;
 uint gameOverEventID;
@@ -12,14 +14,20 @@ typedef struct Context{
     bool needRedraw;
     //Render y ventana
     SDL_Window* window;
-    SDL_Renderer* renderer;
+    //SDL_Renderer* renderer;
     //Guarda el recuadro de la pantalla
     SDL_Rect display;
     //Esto representa mi escena
     scene escena;
+    //Draw
+    renderer::DrawContext drawContext;
+    GameView* gameView;
+    GuiView* guiView;
+    view* currentView;
 }Context;
 
 void initContext(Context* c,int x,int y,int w,int h);
+void uninitContext(Context* c);
 
 
 int main(int /*argc*/, char* /*argv*/[]){
@@ -27,7 +35,7 @@ int main(int /*argc*/, char* /*argv*/[]){
     scene* escena = &context.escena;
     snakeHead* snake = &escena->sake;
     bool exitApp = false;
-    bool gameOver = false;
+    //bool gameOver = false;
     bool isSnakeStart = false;
 
 
@@ -113,7 +121,7 @@ int main(int /*argc*/, char* /*argv*/[]){
                         if(updateEventID == e.type){
                             context.needRedraw = true;
                         }else if(gameOverEventID == e.type){
-                            gameOver = true;
+                            //xcgameOver = true;
                             SDL_RemoveTimer(snake->timer);
                             printf("GameOver\n");
                         }/*else{
@@ -126,11 +134,12 @@ int main(int /*argc*/, char* /*argv*/[]){
             if(noEvent)
                     SDL_Delay(5);
         }else{
-            drawScene(context.renderer,escena);
+            drawScene(context.drawContext.renderer,escena);
+            renderer::draw(&context.drawContext,context);
             context.needRedraw = false;
         };
     }
-    SDL_Quit();
+    uninitContext(&context);
     return 0;
 }
 
@@ -157,6 +166,15 @@ void initContext(Context* c, int x, int y, int w, int h){
         );
     SDL_GetWindowSize(c->window,&c->display.w,&c->display.h);
     SDL_GetWindowSize(c->window,&c->display.w,&c->display.h);
-    c->renderer = SDL_CreateRenderer(c->window,0,SDL_RENDERER_ACCELERATED);
+    c->drawContext.renderer = SDL_CreateRenderer(c->window,0,SDL_RENDERER_ACCELERATED);
 
+}
+void uninitContext(Context* c){
+    if(c){
+        if(c->renderer)
+            SDL_DestroyRenderer(c->renderer);
+        if(c->window)
+            SDL_DestroyWindow(c->window);
+    }
+    SDL_Quit();
 }

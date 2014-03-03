@@ -16,6 +16,9 @@ namespace event {
     void runLoop(EventLoop* l);
     void setDispacher(EventLoop* loop, EventLoopDispacher *d);
     void setContext(EventLoop* l,void* userContext);
+
+    void addEventLoopFirs(EventLoop* l,EventLoop* newLoop);
+    void addEventLoopLast(EventLoop* l,EventLoop* newLoop);
 }
 
 

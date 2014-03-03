@@ -1,6 +1,7 @@
 #include "scene.h"
 #include <math.h>
 #include <time.h>
+#include <stdlib.h>
 
 void initGameField(gameField* field,uint width,uint heigth);
 
