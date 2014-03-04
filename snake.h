@@ -16,7 +16,7 @@ typedef struct snakeHead:snakeNode{
 }snakeHead;
 
 typedef struct drawableSnake: renderer::drawable{
-    snakeHead* snake;
+    snakeHead head;
 }drawableSnake;
 
 void initDrawableSnake(drawableSnake* d, snakeHead* head);
@@ -31,6 +31,7 @@ void startSnake(snakeHead* snake, SDL_Rect *display, SDL_Point *applet);
 void addNode(snakeHead* snake);
 //Manejo de la manzana
 void launchApplet(SDL_Point* Applet,SDL_Rect* display);
+void launchSnake(drawableSnake* drawable,SDL_Rect* display);
 
 //Constantes que sirven para setear el vector director en una direccion concreta
 extern const SDL_Point direcUp,direcDown

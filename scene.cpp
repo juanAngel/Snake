@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-void initGameField(gameField* field,uint width,uint heigth);
+//void initGameField(gameField* field,uint width,uint heigth);
 
 void initScene(SDL_Rect* display,scene* escena){
     if(display && escena){
@@ -11,7 +11,7 @@ void initScene(SDL_Rect* display,scene* escena){
         //Inicializo los numeros aleatorios
         srand(SDL_GetTicks());
         //Inicializo el campo
-        initGameField(&escena->field,display->w,display->h);
+        //initGameField(&escena->field,display->w,display->h);
 
         //test de renderizado de cuadro
         escena->r.x = escena->r.y = 0;
@@ -35,16 +35,16 @@ void initScene(SDL_Rect* display,scene* escena){
     }
 }
 
-void setAplletPoss(gameField* /*field*/){
-}
+//void setAplletPoss(gameField* /*field*/){
+//}
 
-void initGameField(gameField* field
-                   ,uint width,uint heigth){
+//void initGameField(gameField* field
+//                   ,uint width,uint heigth){
 
-    if(field && width && heigth){
-        field->data = (byte*)malloc(width*heigth);
-        field->heigth = heigth;
-        field->width = width;
-        memset(field->data,0,width*heigth);
-    }
-}
+//    if(field && width && heigth){
+//        field->data = (byte*)malloc(width*heigth);
+//        field->heigth = heigth;
+//        field->width = width;
+//        memset(field->data,0,width*heigth);
+//    }
+//}

@@ -29,7 +29,13 @@ void drawRectangle(SDL_Renderer* renderer,rectangle* r){
 }
 
 
-int renderer::initDrawContext(renderer::DrawContext *c, renderer::DrawContext *old){
+int renderer::initDrawContext(renderer::DrawContext* c, renderer::DrawContext* old){
+    if(c && old){
+        c->clearColor = old->clearColor;
+        c->needRedraw = old->needRedraw;
+        c->offset = old->offset;
+        c->renderer = old->renderer;
+    }
     return 0;
 }
 
@@ -53,5 +59,4 @@ void renderer::clear(DrawContext *c){
                                c->clearColor.a);// alpha
         SDL_RenderClear(c->renderer);
     }
-
 }

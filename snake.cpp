@@ -62,8 +62,21 @@ void drawApplet(SDL_Renderer* render,SDL_Point* AppletPos){
         SDL_RenderFillRect(render,&r);
     }
 }
-void renderSnake(renderer::DrawContext* /*context*/,renderer::drawable* /*drawableObject*/){
+void renderSnake(renderer::DrawContext* context,drawableSnake* drawableObject){
+    if(context && context->renderer && drawableObject){
+        snakeNode* node = &drawableObject->head;
+        SDL_Rect r;
+        r.w = r.h = snakeSize;
+        do{
+            r.x = node->pos.x;
+            r.y = node->pos.y;
+            //Dibujo el nodo de la serpiente
+            SDL_SetRenderDrawColor(context->renderer,0,0xff,0,0xff);
+            SDL_RenderFillRect(context->renderer,&r);
 
+            node = node->next;
+        }while(node);
+    }
 }
 
 void drawSnake(SDL_Renderer* render,snakeHead* snake){
@@ -88,12 +101,18 @@ void moveSnake(snakeHead* snake,SDL_Rect* Display,SDL_Point* Applet){
         SDL_Point lastPos,tmp;
         bool colision = false;
 
+        if(!(snake->vecDirector.x || snake->vecDirector.y || snake->speed)){
+            printf("Snake sin velocidad o direccion\n");
+            return;
+        }
+
         //Muevo la posicion de la cabeza
         lastPos = node->pos;
         node->pos.x += (int)(snake->vecDirector.x*snake->speed);
         node->pos.y += (int)(snake->vecDirector.y*snake->speed);
         //Testeo la colision con la manzana
         if(Applet->x == node->pos.x && node->pos.y == Applet->y){
+            //Si me como una manzana, crezco y tiro otra
             addNode(snake);
             launchApplet(Applet,Display);
         }
@@ -130,11 +149,23 @@ void launchApplet(SDL_Point* Applet,SDL_Rect* display){
     Applet->y -= Applet->y%snakeSize;
     printf("Applet %d,%d\n",Applet->x,Applet->y);
 }
+void launchSnake(drawableSnake* drawable,SDL_Rect* display){
+    if(drawable){
+        //drawable->snake = (snakeHead*)malloc(sizeof(snakeHead));
+        SDL_Point* pos = &drawable->head.pos;
+        //Pongo centrado a la serpiente
+        pos->x = display->w/2-snakeSize;
+        pos->y = display->h/2-snakeSize;
+        //Alineo la serpiente a multiplos del snakeSize
+        pos->x -= pos->x%snakeSize;
+        pos->y -= pos->y%snakeSize;
+    }
+}
 
 
 void initDrawableSnake(drawableSnake *d, snakeHead *head){
-    if(d && head){
-        d->snake = head;
-        d->renderDrawable = &renderSnake;
+    if(d){
+        if(head)d->head = *head;
+        d->renderDrawable = (renderer::DrawFunc)&renderSnake;
     }
 }

@@ -40,9 +40,17 @@ int main(int /*argc*/, char* /*argv*/[]){
 
 
     initContext(&context,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480);
+
+    //Configuro la serpiente para un paso de 5 y direccion arriba
+    snake = &context.gameView->snake.head;
+    snake->speed = snakeSize;
+    snake->vecDirector = direcUp;
+
     initScene(&context.display,&context.escena);
     updateEventID = SDL_RegisterEvents(2);
     gameOverEventID = updateEventID+1;
+
+    context.currentView = context.gameView;
 
     SDL_Event e;
     while (!exitApp) {
@@ -83,7 +91,7 @@ int main(int /*argc*/, char* /*argv*/[]){
                                 break;
                         }
                         if(!isSnakeStart){
-                            startSnake(snake,&context.display,&context.escena.Applet);
+                            startSnake(snake,&context.display,&context.gameView->Applet);
                             isSnakeStart = true;
                         }
 
@@ -110,7 +118,7 @@ int main(int /*argc*/, char* /*argv*/[]){
                                    ,yrel);
 
                             if(!isSnakeStart){
-                                startSnake(snake,&context.display,&context.escena.Applet);
+                                startSnake(snake,&context.display,&context.gameView->Applet);
                                 isSnakeStart = true;
                             }
 
@@ -123,6 +131,8 @@ int main(int /*argc*/, char* /*argv*/[]){
                         }else if(gameOverEventID == e.type){
                             //xcgameOver = true;
                             SDL_RemoveTimer(snake->timer);
+                            context.needRedraw = true;
+                            context.currentView = context.guiView;
                             printf("GameOver\n");
                         }/*else{
                             printf("unknown event %x\n",e.type);
@@ -134,8 +144,8 @@ int main(int /*argc*/, char* /*argv*/[]){
             if(noEvent)
                     SDL_Delay(5);
         }else{
-            drawScene(context.drawContext.renderer,escena);
-            renderer::draw(&context.drawContext,context);
+            //drawScene(context.drawContext.renderer,escena);
+            renderer::draw(&context.drawContext,context.currentView);
             context.needRedraw = false;
         };
     }
@@ -166,13 +176,23 @@ void initContext(Context* c, int x, int y, int w, int h){
         );
     SDL_GetWindowSize(c->window,&c->display.w,&c->display.h);
     SDL_GetWindowSize(c->window,&c->display.w,&c->display.h);
+    //Creo una vista de juego
+    c->gameView = (GameView*)malloc(sizeof(*c->gameView));
+    initGameView(c->gameView,&c->display);
+
+    windowsView* windows = (windowsView*)malloc(sizeof(*windows));
+    initWindows(windows);
+    c->guiView = windows;
+
+    //initGameView(c->gameView,&c->display);
+
     c->drawContext.renderer = SDL_CreateRenderer(c->window,0,SDL_RENDERER_ACCELERATED);
 
 }
 void uninitContext(Context* c){
     if(c){
-        if(c->renderer)
-            SDL_DestroyRenderer(c->renderer);
+        if(c->drawContext.renderer)
+            SDL_DestroyRenderer(c->drawContext.renderer);
         if(c->window)
             SDL_DestroyWindow(c->window);
     }

@@ -6,11 +6,17 @@ namespace event {
     }
 
 
-    void setDispacher(EventLoop* loop, EventLoopDispacher *d){
+    void setDispacher(EventLoop* loop, EventLoopDispacher d){
         if(loop && d){
             loop->d = d;
         }
     }
+
+    void setContext(EventLoop *l, void *userContext){
+        if(l)
+            l->userContext = userContext;
+    }
+
 }
 
 
