@@ -1,7 +1,7 @@
 #include "eventloop.h"
 
 namespace event {
-    void runLoop(EventLoop */*loop*/){
+    void runLoop(EventLoop *loop,bool* runing){
 
     }
 
@@ -16,6 +16,15 @@ namespace event {
         if(l)
             l->userContext = userContext;
     }
+
+    void addEventLoopFirs(EventLoop *l, EventLoop *newLoop){
+
+    }
+
+    void addEventLoopLast(EventLoop *l, EventLoop *newLoop){
+
+    }
+
 
 }
 

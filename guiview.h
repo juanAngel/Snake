@@ -18,18 +18,29 @@ typedef struct GuiView:view{
     typeGui type;
 }GuiView;
 
-typedef struct layoutView:GuiView{
+typedef struct groupView:GuiView{
 
-}layoutView;
+}groupView;
 typedef struct buttonView:GuiView{
 
 }buttonView;
 
 typedef struct windowsView:GuiView{
     char* title;
-    layoutView layoutManager;
+    groupView* layoutManager;
 }windowsView;
 
-void initWindows(windowsView* w);
+typedef struct labelView:GuiView{
+    char* text;
+}labelView;
+typedef struct textFieldView:GuiView{
+    char* text;
+}textFieldView;
+
+void initWindows(windowsView* w, event::EventLoop *defaultLoop);
+void initLabel(labelView* w, event::EventLoop *defaultLoop);
+
+void initButton(buttonView* w, event::EventLoop *defaultLoop);
+void initTextField(textFieldView* w, event::EventLoop *defaultLoop);
 
 #endif // GUIVIEW_H

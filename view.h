@@ -10,6 +10,7 @@ typedef struct view:renderer::drawable{
     SDL_Color backgroundColor;
 }view;
 
-void initView(view* v);
+void initView(view* v, event::EventLoop *defaultLoop);
+void runView(view **view, bool* stop);
 
 #endif // VIEW_H

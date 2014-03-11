@@ -16,11 +16,11 @@ const SDL_Point direcUp = {0,-1}
             ,direcLetf  = {-1,0};
 
 int runSnake(int interval,snakeContext* context){
-    SDL_UserEvent e;
+    SDL_Event e;
     e.type = updateEventID;
 
     moveSnake(context->snake,context->display,context->applet);
-    SDL_PushEvent((SDL_Event*)&e);
+    SDL_PushEvent(&e);
 
     return interval;
 }
@@ -133,9 +133,9 @@ void moveSnake(snakeHead* snake,SDL_Rect* Display,SDL_Point* Applet){
             node = node->next;
         }
         if(colision){
-            SDL_UserEvent e;
+            SDL_Event e;
             e.type = gameOverEventID;
-            SDL_PushEvent((SDL_Event*)&e);
+            SDL_PushEvent(&e);
         }
     }
 }
