@@ -8,31 +8,41 @@ CONFIG += c++11
 SOURCES += main.cpp \
     renderer.cpp \
     snake.cpp \
-    scene.cpp \
     view.cpp \
     eventloop.cpp \
     gameview.cpp \
     guiview.cpp \
-    SDL_ttf.c
+#    SDL_ttf.c \
+    containerTypes.cpp \
+    randontree.cpp \
+    records.cpp
 
 #unix:LIBS += -lSDL2
 
 HEADERS += \
     renderer.h \
     snake_global.h \
-    scene.h \
     snake.h \
     eventloop.h \
     view.h \
     gameview.h \
     guiview.h \
-    SDL_ttf.h
+    SDL_ttf.h \
+    containerTypes.h \
+    randontree.h \
+    records.h
 
-LIBS += -lSDL2 -lfreetype
-INCLUDEPATH += /usr/include/freetype2/
-
-DEFINES += USE_FREETYPE_ERRORS
+LIBS += -lSDL2 -lSDL2_mixer -lSDL2_ttf
 
 #LIBS = -landroid
+
+OTHER_FILES += \
+    sound/GameOver.ogg \
+    sound/mutation.wav \
+    sound/snake.ogg \
+    font/arial.ttf \
+    font/lazy.ttf
+
+
 
 

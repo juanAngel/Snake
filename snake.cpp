@@ -1,10 +1,8 @@
 #include "snake.h"
-#include "scene.h"
-
 #include <stdlib.h>
 
 typedef struct snakeContext{
-    snakeHead* snake;
+    Snake* snake;
     SDL_Rect* display;
     SDL_Point* applet;
 }snakeContext;
@@ -15,128 +13,111 @@ const SDL_Point direcUp = {0,-1}
             ,direcRight = {1,0}
             ,direcLetf  = {-1,0};
 
-int runSnake(int interval,snakeContext* context){
-    SDL_Event e;
-    e.type = updateEventID;
-
+int runSnake(int /*interval*/,snakeContext* context){
     moveSnake(context->snake,context->display,context->applet);
-    SDL_PushEvent(&e);
 
-    return interval;
+    renderer::sendUpdateWindows();
+
+    return context->snake->delay;
 }
 
-void startSnake(snakeHead* snake,SDL_Rect* display,SDL_Point* applet){
+void startSnake(Snake* snake,SDL_Rect* display,SDL_Point* applet){
     snakeContext* context = (snakeContext*)malloc(sizeof(*context));
 
     context->snake = snake;
     context->display = display;
     context->applet = applet;
+    snake->delay = 100;
 
-    snake->timer = SDL_AddTimer(100,(SDL_TimerCallback)&runSnake,context);
+    snake->timer = SDL_AddTimer(snake->delay,(SDL_TimerCallback)&runSnake,context);
+
+    Mix_PlayMusic(snake->music,-1);
 
     //Agrego nodos a la seriente hasta conseguir los buscados
     for (int i = 0; i < snakeInitialLength-1; ++i)
-        addNode(snake);
+        addNodeHead(snake);
 }
-void addNode(snakeHead* snake){
-    snakeNode* newNode,*node;
-    //Compruebo los parametros
+void removeAllSnakeNodes(Snake* snake){
     if(snake){
-        //Creo el nuevo nodo de la serpiente
-        newNode = (snakeNode*)malloc(sizeof(*newNode));
-        memset(newNode,0,sizeof(snakeNode));
-        //Busco el ultimo elemento de la cola de la serpiente
-        node = snake;
-        while (node->next)
-            node = node->next;
-
-        newNode->pos = node->pos;
-        node->next = newNode;
+        for(snakeNode* current = snake->head,*old;current;){
+            old = current;
+            current = current->next;
+            free(old);
+        }
+        snake->head = snake->tail = nullptr;
     }
 }
-void drawApplet(SDL_Renderer* render,SDL_Point* AppletPos){
-    if(render && AppletPos){
+
+void drawApplet(renderer::DrawContext context,SDL_Point* AppletPos){
+    if(context && AppletPos){
         SDL_Rect r = {AppletPos->x,AppletPos->y,snakeSize,snakeSize};
-
-        SDL_SetRenderDrawColor(render,0xff,0,0,0xff);
-        SDL_RenderFillRect(render,&r);
+        SDL_Color color = {0xff,0,0,0xff};
+        renderer::fillRect(context,&r,&color);
     }
 }
-void renderSnake(renderer::DrawContext* context,drawableSnake* drawableObject){
-    if(context && context->renderer && drawableObject){
-        snakeNode* node = &drawableObject->head;
+void renderSnake(renderer::DrawContext context,drawableSnake* drawableObject){
+    if(context && drawableObject){
+        snakeNode* node = drawableObject->snake.head;
         SDL_Rect r;
-        r.w = r.h = snakeSize;
+        r.w = r.h = snakeSize-1;
+        SDL_Color color = {0,0xff,0,0xff};
         do{
             r.x = node->pos.x;
             r.y = node->pos.y;
             //Dibujo el nodo de la serpiente
-            SDL_SetRenderDrawColor(context->renderer,0,0xff,0,0xff);
-            SDL_RenderFillRect(context->renderer,&r);
+            renderer::fillRect(context,&r,&color);
 
             node = node->next;
         }while(node);
+        r.x = drawableObject->snake.tail->pos.x+2;
+        r.y = drawableObject->snake.tail->pos.y+2;
+        r.w = r.h = snakeSize-4;
+        color.r = color.b = color.g;
+        renderer::fillRect(context,&r,&color);
     }
 }
-
-void drawSnake(SDL_Renderer* render,snakeHead* snake){
-    if(render && snake){
-        snakeNode* node = snake;
-        SDL_Rect r;
-        r.w = r.h = snakeSize;
-        do{
-            r.x = node->pos.x;
-            r.y = node->pos.y;
-            //Dibujo el nodo de la serpiente
-            SDL_SetRenderDrawColor(render,0,0xff,0,0xff);
-            SDL_RenderFillRect(render,&r);
-
-            node = node->next;
-        }while(node);
-    }
-}
-void moveSnake(snakeHead* snake,SDL_Rect* Display,SDL_Point* Applet){
+void moveSnake(Snake* snake,SDL_Rect* Display,SDL_Point* Applet){
     if(snake && Display && Applet){
-        snakeNode* node = snake;
-        SDL_Point lastPos,tmp;
-        bool colision = false;
+        SDL_Point nextPos;
+        snakeNode* node = snake->tail;
 
         if(!(snake->vecDirector.x || snake->vecDirector.y || snake->speed)){
             printf("Snake sin velocidad o direccion\n");
             return;
         }
+        //Calculo la nueva posicion de la cabeza de la serpiente
+        nextPos.x = node->pos.x+snake->vecDirector.x*snake->speed;
+        nextPos.y = node->pos.y+snake->vecDirector.y*snake->speed;
 
-        //Muevo la posicion de la cabeza
-        lastPos = node->pos;
-        node->pos.x += (int)(snake->vecDirector.x*snake->speed);
-        node->pos.y += (int)(snake->vecDirector.y*snake->speed);
-        //Testeo la colision con la manzana
-        if(Applet->x == node->pos.x && node->pos.y == Applet->y){
-            //Si me como una manzana, crezco y tiro otra
-            addNode(snake);
-            launchApplet(Applet,Display);
-        }
         //Testeo la colision con las paredes del escenario
-        if(node->pos.x < 0 || node->pos.y < 0 || node->pos.x > Display->w || node->pos.y > Display->h )
-            colision = true;
-
-        //Avanozo al siguiente nodo y voy intercambiando las posiciones
-        node = node->next;
-        while(node){
-            tmp = node->pos;
-            node->pos = lastPos;
-            lastPos = tmp;
-            //Testeo la colision con la propia serpiente
-            if((snake->pos.x == node->pos.x) && (snake->pos.y == node->pos.y))
-                colision = true;
-
-            node = node->next;
-        }
-        if(colision){
+        if(nextPos.x < 0 || nextPos.y < 0
+                || nextPos.x > Display->w || nextPos.y > Display->h
+                || snake->field.buff[(nextPos.x/snakeSize)+(nextPos.y/snakeSize)*snake->field.s.w]){
             SDL_Event e;
             e.type = gameOverEventID;
             SDL_PushEvent(&e);
+        }else{
+            moveHeadToTail(snake);
+            SDL_Point* pos = &snake->tail->pos;
+            //Muevo la posicion de el nodo que va a ser la cabea
+            snake->field.buff[(pos->x/snakeSize)+(pos->y/snakeSize)*snake->field.s.w]--;
+            *pos = nextPos;
+            snake->field.buff[(pos->x/snakeSize)+(pos->y/snakeSize)*snake->field.s.w]++;
+
+            //Testeo la colision con la manzana
+            if(Applet->x == nextPos.x && nextPos.y == Applet->y){
+                //Si me como una manzana, crezco y tiro otra
+                for(int i = 0;i<4;i++)
+                    addNodeHead(snake);
+                launchApplet(Applet,Display);
+                if(!(snake->nAppletMeals%5) && snake->delay >10)
+                    snake->delay -= snake->delay/10;
+                //Aumento el contador de manzanas comidas
+                snake->nAppletMeals++;
+                printf("Manzanas comidas %u\n",snake->nAppletMeals);
+            }
         }
+
     }
 }
 void launchApplet(SDL_Point* Applet,SDL_Rect* display){
@@ -151,21 +132,86 @@ void launchApplet(SDL_Point* Applet,SDL_Rect* display){
 }
 void launchSnake(drawableSnake* drawable,SDL_Rect* display){
     if(drawable){
-        //drawable->snake = (snakeHead*)malloc(sizeof(snakeHead));
-        SDL_Point* pos = &drawable->head.pos;
+        MapField* field = &drawable->snake.field;
+        addNodeHead(&drawable->snake);
+        field->s.w = display->w/snakeSize+1;
+        field->s.h = display->h/snakeSize+1;
+        if(!field->buff)
+            field->buff = (byte*)malloc(sizeof(byte)*field->s.w*field->s.h);
+        memset(field->buff,false,sizeof(bool)*field->s.w*field->s.h);
+
+        SDL_Point* pos = &drawable->snake.head->pos;
         //Pongo centrado a la serpiente
         pos->x = display->w/2-snakeSize;
         pos->y = display->h/2-snakeSize;
         //Alineo la serpiente a multiplos del snakeSize
         pos->x -= pos->x%snakeSize;
         pos->y -= pos->y%snakeSize;
+
+        //Pongo la posicion de la serpiente
+        field->buff[(pos->x/snakeSize)+(pos->y/snakeSize)*field->s.w]++;
+
+    }
+}
+void resetSnake(drawableSnake* drawable,SDL_Rect* display){
+    if(drawable){
+        SDL_RemoveTimer(drawable->snake.timer);
+        removeAllSnakeNodes(&drawable->snake);
+        drawable->snake.nAppletMeals = 0;
+        memset(drawable->snake.field.buff,0,drawable->snake.field.s.w*drawable->snake.field.s.h);
+        launchSnake(drawable,display);
+        Mix_HaltMusic();
     }
 }
 
 
-void initDrawableSnake(drawableSnake *d, snakeHead *head){
+void initDrawableSnake(drawableSnake *d, Snake *snake){
     if(d){
-        if(head)d->head = *head;
+        d->snake.head = d->snake.tail = nullptr;
+        if(snake)
+            d->snake = *snake;
         d->renderDrawable = (renderer::DrawFunc)&renderSnake;
     }
+}
+
+
+int getNAppletMeals(drawableSnake *d){
+    if(d)
+        return d->snake.nAppletMeals;
+    return 0;
+}
+
+
+void addNodeHead(Snake *snake){
+    snakeNode* node = (snakeNode*)malloc(sizeof(snakeNode));
+    if(snake->head){
+        *node = *snake->head;
+        //umento el indicador de uso del campo
+        snake->field.buff[((node->pos.x/snakeSize)+(node->pos.y/snakeSize)*snake->field.s.w)]++;
+        node->next = snake->head;
+        snake->head = node;
+    }else{
+        snake->head = snake->tail = node;
+        node->pos.x = node->pos.y = 0;
+        node->next = nullptr;
+    }
+}
+
+void addNodeTail(Snake *snake){
+    snakeNode* node = (snakeNode*)malloc(sizeof(snakeNode));
+    if(snake->head){
+        *node = *snake->tail;
+        snake->field.buff[(node->pos.x/snakeSize)+(node->pos.y/snakeSize)*snake->field.s.w]++;
+        snake->tail->next = node;
+        snake->tail = node;
+    }else{
+        snake->head = snake->tail = node;
+        node->next = nullptr;
+    }
+}
+void moveHeadToTail(Snake *snake){
+    snake->tail->next = snake->head;
+    snake->head = snake->head->next;
+    snake->tail = snake->tail->next;
+    snake->tail->next = nullptr;
 }

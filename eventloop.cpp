@@ -1,7 +1,7 @@
 #include "eventloop.h"
 
 namespace event {
-    void runLoop(EventLoop *loop,bool* runing){
+    void runLoop(EventLoop */*loop*/,bool* /*runing*/){
 
     }
 
@@ -12,18 +12,23 @@ namespace event {
         }
     }
 
-    void setContext(EventLoop *l, void *userContext){
+    void setContext(EventLoop *l, void *loopContext){
         if(l)
-            l->userContext = userContext;
+            l->loopContext = loopContext;
     }
 
-    void addEventLoopFirs(EventLoop *l, EventLoop *newLoop){
-
+    int dispachEvent(EventLoop *loop, SDL_Event *e){
+        int status = EVENT_NOT_HANDLE;
+        while (loop) {
+            if((status = loop->d(loop,e)) == 0){
+                loop = (event::EventLoop*)loop->next;
+            }else{
+                loop = nullptr;
+            }
+        }
+        return status;
     }
 
-    void addEventLoopLast(EventLoop *l, EventLoop *newLoop){
-
-    }
 
 
 }

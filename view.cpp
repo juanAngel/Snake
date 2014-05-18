@@ -1,22 +1,14 @@
 #include "view.h"
 
+
 //funcion de draw que no hace nada
-void viewNullDraw(renderer::DrawContext* /*context*/,renderer::drawable* /*drawableObject*/){}
-int viewDefaultEventDispacher(event::EventLoop* loop,SDL_Event* e){
-    return 0;
-}
+void viewNullDraw(renderer::DrawContext /*context*/,renderer::drawable* /*drawableObject*/){}
 
 void initView(view *v,event::EventLoop* defaultLoop){
     if(v){
-        event::EventLoop* newLoop;
         v->renderDrawable = &viewNullDraw;
 
-        newLoop = (event::EventLoop*)malloc(sizeof(*newLoop));
-
-        v->loop = newLoop;
-        newLoop->next = defaultLoop;
-        event::setContext(newLoop,v);
-        event::setDispacher(newLoop,&viewDefaultEventDispacher);
+        v->loop = defaultLoop;
     }
 }
 void runView(view **view, bool* stop){
@@ -31,7 +23,7 @@ void runView(view **view, bool* stop){
                 loop = (*view)->loop;
                 while (loop) {
                     if(loop->d(loop,&e) == 0){
-                        loop = loop->next;
+                        loop = (event::EventLoop*)loop->next;
                     }else break;
                 }
             }
@@ -39,10 +31,24 @@ void runView(view **view, bool* stop){
                 loop = (*view)->loop;
                 while (loop) {
                     if(loop->d(loop,NULL) == 0){
-                        loop = loop->next;
+                        loop = (event::EventLoop*)loop->next;
                     }else break;
                 }
             }
         }
+    }
+}
+
+
+void setPoss(view *v, SDL_Point p){
+    if(v){
+        v->r.x = p.x;
+        v->r.y = p.y;
+    }
+}
+void setSize(view *v, Size s){
+    if(v && s.h && s.w){
+        v->r.w = s.w;
+        v->r.h = s.h;
     }
 }

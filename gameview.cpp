@@ -1,25 +1,57 @@
 #include "gameview.h"
 
+const char marcadorFormat[] = "Puntos %u";
+
 int gameViewEventDispacher(event::EventLoop* loop,SDL_Event* e);
 
 void GameViewDraw(renderer::DrawContext* context,GameView* game){
     if(context && game){
-        game->snake.renderDrawable(context,&game->snake);
-        drawApplet(context->renderer,&game->Applet);
+
+        SDL_SetRenderDrawColor(renderer::getRenderer(context),0xff,0xff,0xff,0xff);
+
+        char buffText[sizeof(marcadorFormat)+10];
+        sprintf(buffText,marcadorFormat,game->drawSnake.snake.nAppletMeals);
+        renderer::drawText(context,game->defaultFont,buffText);
+
+        game->drawSnake.renderDrawable(context,&game->drawSnake);
+        drawApplet(context,&game->Applet);
     }
 }
 
 
 void initGameView(GameView *game,SDL_Rect* r,event::EventLoop* defaultLoop){
     if(game && r){
+        int audio_rate = 22050;
+        Uint16 audio_format = AUDIO_S16; /* 16-bit stereo */
+        int audio_channels = 2;
+        int audio_buffers = 4096;
+
+        if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
+            printf("No se pudo abrir el audio!\n");
+            exit(1);
+        }
+
+        event::EventLoop* newLoop;
         memset(game,0,sizeof(*game));
         initView(game,defaultLoop);
+
+        newLoop = (event::EventLoop*)malloc(sizeof(*newLoop));
+        newLoop->next = nullptr;
+        addNodeBefore(newLoop,game->loop);
+
+        game->loop = newLoop;
+        event::setContext(newLoop,game);
+        event::setDispacher(game->loop,&gameViewEventDispacher);
+
         game->r = *r;
 
         game->renderDrawable = (renderer::DrawFunc)&GameViewDraw;
-        game->loop->d = &gameViewEventDispacher;
-        initDrawableSnake(&game->snake,NULL);
-        launchSnake(&game->snake,r);
+        initDrawableSnake(&game->drawSnake,NULL);
+
+        game->drawSnake.snake.music  = Mix_LoadMUS("sound/snake.ogg");
+        Mix_VolumeMusic(MIX_MAX_VOLUME);
+
+        launchSnake(&game->drawSnake,r);
         launchApplet(&game->Applet,r);
     }
 }
@@ -27,8 +59,8 @@ void initGameView(GameView *game,SDL_Rect* r,event::EventLoop* defaultLoop){
 int gameViewEventDispacher(event::EventLoop* loop,SDL_Event* e){
     int result = 0;
     if(loop && e){
-        GameView* gameView = (GameView*)loop->userContext;
-        snakeHead* snake = &gameView->snake.head;
+        GameView* gameView = (GameView*)loop->loopContext;
+        Snake* snake = &gameView->drawSnake.snake;
         switch (e->type) {
             case SDL_KEYDOWN:
                 result++;

@@ -1,3 +1,4 @@
+/** @file */
 #ifndef SNAKE_GLOBAL_H
 #define SNAKE_GLOBAL_H
 
@@ -31,18 +32,20 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+typedef struct Size{
+    ulong w,h;
+}Size;
 
-typedef struct rectangle:SDL_Rect{
-    SDL_Color fillColor;
-    SDL_Color borderColor;
-}rectangle;
+extern uint updateEventID;      /**< Identificador de el evento de actualizar pantalla */
+extern uint gameOverEventID;    /**< Identificador de el evento de Partida terminada */
 
-
-
-extern uint updateEventID;
-extern uint gameOverEventID;
-
-#define snakeSize 10
+/**
+ * Tamaño del lado que compone los bloques de la serpiente
+ * */
+#define snakeSize 15
+/**
+ * Numero de bloques iniciales de la serpiente
+ * */
 #define snakeInitialLength 10
 
 #ifdef _DEBUG
